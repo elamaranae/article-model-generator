@@ -1,7 +1,7 @@
 # Article Model Generator
 
-Article Model Generator for libcmark Markdown AST. You write your aricles or
-blogs in markdown and `amg` can convert them into JSON that you can use with
+Article Model Generator for libcmark Markdown AST. You write your articles or
+blogs in Markdown and `amg` can convert them into JSON that you can use with
 frontend frameworks to render your article.
 
 ## Usage
@@ -19,7 +19,7 @@ cd amg ; stack install --local-bin-path /usr/local/bin/
 
 ### Short Example
 
-`amg` can convert the following markdown
+`amg` can convert the following Markdown
 
 ```md
 # Blog title
@@ -27,7 +27,7 @@ cd amg ; stack install --local-bin-path /usr/local/bin/
 Blog *content **is** short*.
 ```
 
-to easy to use JSON..
+To JSON
 
 ```json
 {
