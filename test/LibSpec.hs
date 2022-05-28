@@ -3,6 +3,8 @@
 
 module LibSpec where
 
+import Data.Aeson (Value, encode)
+import Data.Aeson.QQ.Simple (aesonQQ)
 import Test.Hspec
 import Text.RawString.QQ(r)
 import Lib
@@ -42,10 +44,19 @@ spec = do
         [r|{"data":[{"data":[{"markup":["strong"],"content":"history "},{"markup":["strong","emphasis"],"content":"is"},{"markup":["strong"],"content":" nice"}],"type":"paragraph"},{"data":[{"markup":["emphasis"],"content":"however "},{"markup":["emphasis","strong"],"content":"geography"},{"markup":["emphasis"],"content":" rocks"}],"type":"paragraph"}],"type":"document"}|]
 
     it "code blocks" $ do
-      markdownToJSON "```\nvar a = 5\nreturn\n```" `shouldBe` [r|{"data":[{"data":[{"markup":[],"content":"var a = 5\nreturn\n"}],"type":"code_block"}],"type":"document"}|]
-
-    it "ordered list items" $ do
-      markdownToJSON "1. first\n2. second" `shouldBe` [r|{"data":[{"data":[{"data":[{"markup":[],"content":"first"}],"type":"paragraph"},{"data":[{"markup":[],"content":"second"}],"type":"paragraph"}],"type":"list","list_type":"ordered_list"}],"type":"document"}|]
-
-    it "ordered list with soft breaks and italics" $ do
-      markdownToJSON "1. first *step\n is* something\n2. second" `shouldBe` [r|{"data":[{"data":[{"data":[{"markup":[],"content":"first "},{"markup":["emphasis"],"content":"step"},{"markup":["emphasis"],"content":" "},{"markup":["emphasis"],"content":"is"},{"markup":[],"content":" something"}],"type":"paragraph"},{"data":[{"markup":[],"content":"second"}],"type":"paragraph"}],"type":"list","list_type":"ordered_list"}],"type":"document"}|]
+      markdownToJSON [r|
+```
+var a = 5
+return
+```
+      |] `shouldBe` encode [aesonQQ|
+{
+  "data": [
+    {
+      "data": [ { "markup": [], "content": "var a = 5\nreturn\n" } ],
+      "type": "code_block"
+    }
+  ],
+  "type": "document"
+}
+      |]

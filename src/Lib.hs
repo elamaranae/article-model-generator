@@ -1,19 +1,21 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 
-module Lib ( markdownToJSON) where
+module Lib (markdownToJSON, viewNode) where
 
 import Data.Aeson (ToJSON(..), Value(..), object, (.=), encode)
 import qualified CMark as C
 import Data.Text (Text)
 import Data.ByteString.Lazy (ByteString)
 import Data.Char (toLower)
+import Text.RawString.QQ(r)
 
 newtype Markdown = Markdown [Entity]
 
 data Entity = Paragraph [Content]
             | Header [Content] Int
             | CodeBlock [Content]
-            | List [Entity]
+            | List [[Entity]]
 
 data Markup = Strong
             | Emphasis
@@ -34,8 +36,8 @@ processEntity (C.Node _ (C.HEADING level) children) = Header (children >>= proce
 processEntity (C.Node _ (C.CODE_BLOCK _ text) children) = CodeBlock [Content text []]
 processEntity (C.Node _ (C.LIST attributes) children) = List (map processListItem children)
 
-processListItem :: C.Node -> Entity
-processListItem (C.Node _ C.ITEM (child:_)) = processEntity child
+processListItem :: C.Node -> [Entity]
+processListItem (C.Node _ C.ITEM children) = map processEntity children
 
 processContents :: C.Node -> [Content]
 processContents (C.Node _ (C.TEXT text) _) = [Content text []]
@@ -88,3 +90,21 @@ instance ToJSON Content where
 
 toLowerString :: String -> String
 toLowerString = map toLower
+
+-- for checking node structure
+viewNode = C.commonmarkToNode [] [r|
+1. This is first.
+
+2. This is second.
+
+    Nested text.
+
+    ```javascript
+    nested code
+    ```
+
+3. This is third.
+
+    - Nested One
+    - Nested Two
+  |]

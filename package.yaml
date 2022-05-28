@@ -25,6 +25,7 @@ dependencies:
 - cmark
 - text
 - bytestring
+- raw-strings-qq
 
 library:
   source-dirs: src
