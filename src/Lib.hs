@@ -16,6 +16,7 @@ data Entity = Paragraph [Content]
             | Header [Content] Int
             | CodeBlock [Content]
             | List [[Entity]]
+            | BlockQuote [Entity]
 
 data Markup = Strong
             | Emphasis
@@ -35,6 +36,7 @@ processEntity (C.Node _ C.PARAGRAPH children) = Paragraph (children >>= processC
 processEntity (C.Node _ (C.HEADING level) children) = Header (children >>= processContents) level
 processEntity (C.Node _ (C.CODE_BLOCK _ text) children) = CodeBlock [Content text []]
 processEntity (C.Node _ (C.LIST attributes) children) = List (map processListItem children)
+processEntity (C.Node _ C.BLOCK_QUOTE children) = BlockQuote (map processEntity children)
 
 processListItem :: C.Node -> [Entity]
 processListItem (C.Node _ C.ITEM children) = map processEntity children
@@ -80,6 +82,11 @@ instance ToJSON Entity where
       "type" .= ("list" :: String),
       "list_type" .= ("ordered_list" :: String)
     ]
+  toJSON (BlockQuote entities) = object
+    [
+      "data" .= map toJSON entities,
+      "type" .= ("block_quote" :: String)
+    ]
 
 instance ToJSON Content where
   toJSON (Content text markups) = object
@@ -93,18 +100,5 @@ toLowerString = map toLower
 
 -- for checking node structure
 viewNode = C.commonmarkToNode [] [r|
-1. This is first.
-
-2. This is second.
-
-    Nested text.
-
-    ```javascript
-    nested code
-    ```
-
-3. This is third.
-
-    - Nested One
-    - Nested Two
+> This is a simple block quote
   |]
